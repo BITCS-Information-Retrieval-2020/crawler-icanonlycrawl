@@ -92,8 +92,6 @@ python run.py
   3. 调用PDFDownloader的run函数爬取爬取数据表中所有visit字段为false的url对应的pdf
   4. 调用VideoDownloader的run函数爬取爬取数据表中所有visit字段为false的url对应的视频
 
-#### 1.6 flake8检查截图
-
 ### 2. CrossMinds
 
 #### 2.1 代码结构
@@ -163,8 +161,7 @@ CrossMinds网站中的视频主要来自于CrossMinds、Youtube 和 Vimeo三个�
 
    视频下载可以在爬取到一篇论文的基本信息之后就进行，也可以在基本信息都爬完之后，从数据库中获取所有包含视频URL的论文信息，视频文件默认存储在```./data/videos/```路径下
 
-- PDF文件下载。PDF文件和视频的文件名在存储时都需要都标题进行处理，去掉文件名非法字符。PDF文件默认存储在```./data/PDFs/```路径下
-#### 2.5 flake8检查截图
+- PDF文件下载。PDF文件和视频的文件名在存储时都需要都标题进行处理，去掉文件名非法字符。PDF文件默认存储在```./data/PDFs/```路径下  
 
 
 
@@ -220,7 +217,7 @@ tqdm==4.56.0
 beautifulsoup4==4.9.3
 ```
 
-#### 3.5 flake8检查截图
+
 
 ## 五、性能提升模块说明
 该部分分别对IP池、线程池和增量式的实现进行相关说明
