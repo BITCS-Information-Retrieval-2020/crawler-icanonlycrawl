@@ -19,14 +19,14 @@
 | 谭小焱  | CrossMinds基本信息增量式爬取 |
 | 徐伊玲  | CrossMinds视频及pdf增量式爬取 |
 | 张峄天  | IP池 + Papers With Code所有信息增量式爬取 |
-| 何亮丽  | 线程池 |
+| 何亮丽  | 线程池 + 协调与整合 |
 | 张悉伦  | 学习增量式爬取并撰写该部分文档 |
 ## 三、爬虫内容及统计信息
 |  网站   | 论文总量 |  视频数量   | pdf数量  |  IP池   | 线程池  | 增量式  |
 |  ----  | ----  |  ----  | ----  |  ----  | ----  |  ----  |
-| ACL Anthology  | 61462  |  1283  | 59789  |  ✔  | ✔  | ✔  |
-|  CrossMinds  | ----  |  ----  | ----  |  ✔  | ✔  |  ✔  |
-|  Papers With Code | ----  |  ----  | ----  | ✔ | ✔  |  ✔  |
+| ACL Anthology  | 61462 |  1283  | 59789  |  ✔  | ✔  | ✔  |
+|  CrossMinds  | 3314 | 278 | 561 |  ✔  | ✔  |  ✔  |
+|  Papers With Code | 519 | 0 | 519  | ✔ | ✔  |  ✔  |
 ## 四、基础爬虫模块
 该部分分别对ACL Anthology，CrossMinds，Papers With Code三个网站的所有信息的爬取进行说明，包括代码目录结构、代码必要说明、部署过程、启动运行流程、依赖的第三方库及版本。  
 ### 1. ACL Anthology
@@ -100,12 +100,12 @@ pip install pymongo
 pip install pytube
 ```
 #### 2.3 运行代码
-2.3.1 爬取基础信息：  
+- 爬取基础信息：  
 ```bash
 cd SpiderForCrossminds
 python main.py
 ```
-2.3.2 爬取视频和pdf：(也可以和基础信息一起爬取) 
+- 爬取视频和pdf：(也可以和基础信息一起爬取) 
 ```bash
 cd SpiderForCrossminds
 python downloader.py
@@ -201,5 +201,97 @@ requests==2.23.0
 tqdm==4.56.0
 beautifulsoup4==4.9.3
 ```
+## 五、性能提升模块说明
+该部分分别对IP池、线程池和增量式的实现进行相关说明
+### 1. 线程池
+由于项目爬取时单线程的爬取速度慢，会耗费过多时间，所以本项目实现了线程池进行并发爬虫。  
+#### 1.1  关于线程池的选取
+- 多进程：密集CPU任务，需要充分使用多核CPU资源（服务器，大量的并行计算）的时候，用多进程。
+- 多线程：密集I/O任务（网络I/O，磁盘I/O，数据库I/O）使用多线程合适。
+由于爬虫为密集型的I/O任务，因此选取多线程/线程池实现。  
+在配置线程池之前，对一个小的视频集（8个视频）的爬取下载进行性能提升的验证实验，其中进程池使用的是multiprocess.Pool，线程池使用的是multiprocessing.dummy.Pool，实验结果如下表所示：  
+|  方案  |  爬取时间 |
+|  ----  | ----  |
+| 单线程  | 178.447s |
+| 进程池  | 47.56s |
+| 线程池  | 43.23s |
 
+#### 1.2 依赖
+```python
+import time
+from multiprocessing.dummy import Pool
+
+```
+#### 1.3 相关函数使用
+```python
+def func(msg):
+    
+pool = Pool(processes=3)
+#map/imap和apply/apply_async的区别是：map/imap可以多任务执行，即第二个参数为多任务的所有输入的列表，而apply_async/apply为单任务执行，需要写在循环内部才能实现并发。
+pool.imap(func,[msg,])        # imap可以尽快返回一个Iterable的结果，而map则需要等待全部Task执行完毕，返回list。
+pool.map(func, [msg, ])       # 阻塞 相当于把多个任务map为n个组，每个组分配一个线程。
+
+pool.apply_async(func, (msg,))  # 单次任务异步执行。一个任务执行完再进行下一个任务
+pool.apply(func,(msg,))       # 单次任务同步执行。单次启动一个任务，但是异步执行，启动后不等这个进程结束又开始执行新任务
+
+pool.starmap(func, [msg, ]) #starmap 与 map 的区别是，starmap 可以传入多个参数。
+
+pool.close()
+pool.join()  # 调用join之前，先调用close函数，否则会出错。执行完close后不会有新的进程加入到pool,join函数等待所有子进程结束
+
+# 使用imap函数可以结合tqdm进度条
+for _ in tqdm(pool.imap(func,[msg,]),total=len([msg,])):
+		pass
+```
+
+#### 1.4 工作模式
+- ACL Anthology：利用线程池解析爬取下来的论文url获得论文信息；线程池爬取pdf和视频。
+- Crossminds：利用线程池爬取网站得到json数据；线程池解析并存储论文信息；线程池爬取pdf和视频。
+- PaperWithCOde：利用线程池解析论文url获得论文信息；线程池爬取pdf。
+### 2. IP Pool
+由于项目爬取的网站中有视频以及PDF的下载需求，并且由于目标网站的特殊性，项目需要同时具有**科学上网**以及**防止反爬虫**的能力。因此，本项目配合[clash](https://github.com/Dreamacro/clash) 来实现IP池，让爬虫更加高效可用。
+
+#### 2.1 相关代码
+
+本部分的实现在各项目中的`ClashControl.py`文件中，针对不同项目的特点有些许不同。实现了类`ClashControl`其中主要的函数有：
+
+```python
+class ClashControl:
+    def getProxies(self)
+    def checkProxy(self, proxyName)
+    def getRandomProxy(self)
+    def changeProxyByProxyName(self, proxyName)
+    def changeRandomAvailableProxy(self)
+```
+
+#### 2.2 工作模式
+
+1. 首先在本地/远程主机配置好clash，并导入代理节点信息，之后保持clash打开状态。本项目中所涉及的clash信息及配置如下：
+
+   ```json
+   clash_host = "127.0.0.1"
+   controller_port = "65117"
+   proxy_port = "1717"
+   ```
+
+2. 调用clash提供的RESTful AP进行代理控制，具体见代码；
+
+3. 在项目中对应的位置加入下载和切换策略，并根据目标网站的反爬策略等进行相应的调整，保证爬虫的可用性。
+
+#### 2.3 使用方法
+
+在需要使用到的类中，引入`ClashControl`类并创建对象，设置http请求的代理为clash提供的代理端口，使用类中构造的函数进行爬取策略设计即可。
+
+#### 2.4 依赖
+
+```
+Proxy Software ： clash
+Python Libraries：
+    random
+    psutil==5.8.0
+    requests==2.23.0
+```
+
+
+### 3. 增量式爬取
 
