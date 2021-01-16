@@ -225,6 +225,7 @@ from multiprocessing.dummy import Pool
 #### 1.3 相关函数使用
 ```python
 def func(msg):
+    return
     
 pool = Pool(processes=3)
 #map/imap和apply/apply_async的区别是：map/imap可以多任务执行，即第二个参数为多任务的所有输入的列表，而apply_async/apply为单任务执行，需要写在循环内部才能实现并发。
