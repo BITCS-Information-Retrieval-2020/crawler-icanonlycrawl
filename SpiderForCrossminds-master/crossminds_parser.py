@@ -35,7 +35,10 @@ class crossminds_parser:
 
     def parse_publicationorg(self, item):
         string = ' '
-        publicationorg = string.join(item["category"][0].split(' ')[0:-1])
+        if item["category"][0].split(' ')[-1] in ['2020', '2019']:
+            publicationorg = string.join(item["category"][0].split(' ')[0:-1])
+        else:
+            publicationorg = item["category"][0]
         return publicationorg
 
     def parseurl_fromweb(self, item):
