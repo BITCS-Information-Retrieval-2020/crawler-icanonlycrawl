@@ -42,7 +42,7 @@ beautifulsoup4==4.9.3
 
 #### 1.2 运行代码
 ```bash
-cd SpiderForACL
+cd SpiderForACL-master
 python run.py
 ```
 
@@ -105,12 +105,12 @@ pip install pytube
 #### 2.3 运行代码
 - 爬取基础信息：  
 ```bash
-cd SpiderForCrossminds
+cd SpiderForCrossminds-master
 python main.py
 ```
 - 爬取视频和pdf：(也可以和基础信息一起爬取) 
 ```bash
-cd SpiderForCrossminds
+cd SpiderForCrossminds-master
 python downloader.py
 ```
 #### 2.4 整体流程
@@ -190,7 +190,7 @@ PaperWithCode爬虫基于requests和beautifulsoup进行开发，能够爬取[Pap
 爬虫可通过目录下的`run.py`文件运行：
 
 ```bash
-cd SpiderForPwC
+cd SpiderForPwC-master
 python run.py
 ```
 
