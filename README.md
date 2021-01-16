@@ -11,7 +11,22 @@
 - 用Python的Flake8( [https://flake8.pycqa.org/en/latest/](https://flake8.pycqa.org/en/latest/) )库检查代码是否规范
 - 模块接口要求：爬虫模块最终需要交给检索模块一个MongoDB数据库和磁盘文件。
 ### 2. 与检索组对接要求
-<https://github.com/BITCS-Information-Retrieval-2020/search-rattailcollagen1/blob/master/searcher/data/dataFlow/fromCrawler.json>
+```json
+{
+  "_id": 1,
+  "title": "...",
+  "authors": "author1, author2, ...",
+  "abstract": "...",
+  "publicationOrg": "CVPR",
+  "year": 2020,
+  "pdfUrl": "...",
+  "pdfPath": "./data/PDFs/xx.pdf",
+  "publicationUrl": "https://...",
+  "codeUrl": "...",
+  "videoUrl": "...",
+  "videoPath": "./data/videos/xx.mp4"
+}
+```
 ## 二、小组成员及分工
 |  成员   | 分工  |
 |  ----  | ----  |
