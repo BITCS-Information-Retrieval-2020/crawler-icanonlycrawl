@@ -58,8 +58,8 @@ class UrlCrawler:
                 continue
             if i % 2 == 0 and status[i] == '0':
                 page = int(status[i + 1])
-                print("Part " + self.portalName[int((i + 1) / 2)] +
-                      " in progress, starting from page " + status[i + 1])
+                print("Part " + self.portalName[int((i + 1) / 2)]
+                      + " in progress, starting from page " + status[i + 1])
                 break
             elif i % 2 == 0 and status[i] == '1':
                 print(
@@ -148,8 +148,7 @@ class UrlCrawler:
             return
 
         for category in range(type, len(self.portalList)):
-            print("Starting crawl " +
-                  self.portalName[category] + " from page " + str(page) + "...")
+            print("Starting crawl " + self.portalName[category] + " from page " + str(page) + "...")
             is_end = False
             real_urls = []
             while not is_end:
@@ -169,8 +168,7 @@ class UrlCrawler:
                 real_urls = temp_urls[:]
                 self.saveUrls(real_urls)
                 # 爬取完毕，更新状态
-                print(self.portalName[category] + " page " +
-                      str(page) + " finished. Next Page...")
+                print(self.portalName[category] + " page " + str(page) + " finished. Next Page...")
                 page = page + 1
                 status[category * 2 + 1] = str(page)
                 with open("./progress", 'w') as f:

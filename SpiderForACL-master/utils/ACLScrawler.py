@@ -40,6 +40,7 @@ class ACLScrawler:
         # # 爬取论文的视频withIPpool
         self.videoManager.run()
 
+
 if __name__ == '__main__':
     aclscrawler = ACLScrawler()
     aclscrawler.run()
